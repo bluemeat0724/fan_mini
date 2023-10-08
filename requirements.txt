@@ -1,0 +1,13 @@
+fastapi
+python-multipart
+pydantic_settings
+python-dotenv
+sqlalchemy
+pymysql
+toml
+requests
+alembic
+uvicorn
+pyjwt
+icecream
+python-jose[cryptography]
