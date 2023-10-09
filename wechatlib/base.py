@@ -5,11 +5,12 @@ File: base.py
 """
 import os
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 from pydantic import Field, BaseModel, field_validator, model_validator, ConfigDict
 import toml
 from pydantic_settings import BaseSettings
+from config.config import settings
 
 HERE = Path(__file__).parent.absolute()
 
@@ -63,10 +64,14 @@ class WechatConfig(BaseSettings):
     appid: str = ''
     secret: str = ''
     baseurl: str = Field(default='https://api.weixin.qq.com/', exclude=True)
+    mchid: Optional[str] = None
+    mchkey: Optional[str] = None
+
 
     @model_validator(mode='after')
     def load_app_config(cls, values):
         wechat = {}
+
         if "settings" in globals():
             if isinstance(settings, (Dict, BaseModel)):
                 if hasattr(settings, 'wechat'):

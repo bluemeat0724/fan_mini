@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from wechatlib.services import WeChatAPI
+from wechatlib.miniapp import WeChatAPI
 
 
 class WechatUserLog(BaseModel):

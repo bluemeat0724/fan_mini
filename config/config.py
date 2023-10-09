@@ -45,7 +45,7 @@ class LoadConfig:
         self.env_path = os.path.join(HERE, "envs", self.envfile)
         self.config = toml.load(self.config_path)
         load_dotenv(self.env_path)
-        self.db = self.config.get("db", {})
+        self.db = self.config.pop("db", {})
         redis_url = self.db_redis()
         jwt_config = self.jwt_config()
 

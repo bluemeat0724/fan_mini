@@ -11,3 +11,4 @@ uvicorn
 pyjwt
 icecream
 python-jose[cryptography]
+pycryptodome
