@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from datetime import timedelta
-from typing import Optional, Union, List
+from typing import Optional, Union, List, Tuple
 
 from pydantic import ConfigDict, BaseModel, model_validator, field_validator
 from pathlib import Path
@@ -123,9 +123,9 @@ class LoadConfig:
             ACCESS_TOKEN_LIFETIME: Union[List, timedelta] = timedelta(days=1)
             REFRESH_TOKEN_LIFETIME: Union[List, timedelta] = timedelta(days=10)
             ALGORITHM: str = "HS256"
-            AUTH_HEADER_TYPES: List[str] = ["Bearer"]
+            AUTH_HEADER_TYPES: Optional[Tuple] = ("Bearer",)
             AUTH_HEADER_NAME: str = "Authorization"
-            SECRET_KEY: Optional[str] = None
+            SECRET_KEY: Optional[bytes] = None
 
             @field_validator('ACCESS_TOKEN_LIFETIME', 'REFRESH_TOKEN_LIFETIME')
             def validate_timedelta(cls, v):

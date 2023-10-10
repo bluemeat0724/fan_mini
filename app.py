@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from config.config import settings
 from common.response import StructuredResponse
 from apis.user import router as userrouter
+from common.middlewares import pub_exception_handler
 
 app = FastAPI(
     debug=settings.debug,
@@ -19,7 +20,7 @@ app = FastAPI(
     default_response_class=StructuredResponse,
 )
 
-app.include_router(userrouter, prefix="/user", tags=["用户模块"])
+app.exception_handler(Exception)(pub_exception_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,6 +29,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(userrouter, prefix="/user", tags=["用户模块"])
 
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=8009, workers=1)

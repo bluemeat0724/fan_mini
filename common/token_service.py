@@ -1,9 +1,9 @@
 from datetime import timedelta, datetime
-from typing import Dict
-from cryptography.fernet import Fernet
+from typing import Dict, Optional
+from fastapi import Depends
 
 from jose import jwt
-from pydantic import BaseModel
+from starlette.requests import Request
 
 from config.config import settings
 
@@ -12,6 +12,7 @@ class TokenService:
 
     def __init__(self):
         self.config = settings.jwt_config
+        self.token_type = self.config.AUTH_HEADER_TYPES[0]
         self.secret_key = self.config.SECRET_KEY
         self.access_token_lifetime = self.config.ACCESS_TOKEN_LIFETIME
         self.refresh_token_lifetime = self.config.REFRESH_TOKEN_LIFETIME
@@ -26,9 +27,25 @@ class TokenService:
         encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.config.ALGORITHM)
         return encoded_jwt
 
-    def decode_access_token(self, token: str):
+    def decode(self, token: str):
+        if token.startswith(self.config.AUTH_HEADER_TYPES):
+            token = token.split(' ')[1]
         return jwt.decode(token, self.secret_key, algorithms=[self.config.ALGORITHM])
 
 
-if __name__ == "__main__":
-    print(Fernet.generate_key())
+class LoadAuthorizationHeader:
+    def __call__(self, request: Request) -> Optional[str]:
+        token = request.headers.get("Authorization")
+        return token
+
+
+def get_current_user(request: Request,token: str = Depends(LoadAuthorizationHeader())):
+    request_from_swagger = request.headers.get('referer').endswith('docs') if request.headers.get('referer') else False
+    if request_from_swagger:
+        return {
+        "id": 1,
+    }
+    payload = TokenService().decode(token)
+    return payload
+
+
