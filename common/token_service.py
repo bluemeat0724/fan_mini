@@ -1,9 +1,10 @@
 from datetime import timedelta, datetime
 from typing import Dict, Optional
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 
 from jose import jwt
 from starlette.requests import Request
+from starlette.status import HTTP_401_UNAUTHORIZED
 
 from config.config import settings
 
@@ -36,16 +37,6 @@ class TokenService:
 class LoadAuthorizationHeader:
     def __call__(self, request: Request) -> Optional[str]:
         token = request.headers.get("Authorization")
+        if not token:
+            raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Not authenticated")
         return token
-
-
-def get_current_user(request: Request,token: str = Depends(LoadAuthorizationHeader())):
-    request_from_swagger = request.headers.get('referer').endswith('docs') if request.headers.get('referer') else False
-    if request_from_swagger:
-        return {
-        "id": 1,
-    }
-    payload = TokenService().decode(token)
-    return payload
-
-

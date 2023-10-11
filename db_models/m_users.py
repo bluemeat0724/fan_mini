@@ -12,6 +12,6 @@ class WechatUser(ModelBase):
     unionid = Column(String(255), index=True, nullable=True)
     mobile = Column(String(255), index=True)
     avatar = Column(String(255), nullable=True)
-    nickname = Column(String(255), nullable=True, default='微信用户')
+    nickname = Column(String(255), nullable=True)
     type_code = Column(Integer, default=1)
     status = Column(Integer, nullable=True, default=1, index=True, comment='状态 1:正常 0:失效')

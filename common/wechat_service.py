@@ -16,22 +16,22 @@ class WechatBaseService:
         self.db = db
         self.api_service = WeChatAPI()
 
-    def create_user(self, openid: str, unionid: str):
+    def reg_user(self, openid: str, unionid: str):
         user = self.user_model(openid=openid, unionid=unionid)
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)
         return user
 
-    def load_user(self, openid: str, unionid: str = None):
+    def load_or_reg_user(self, openid: str, unionid: str = None):
         user = self.db.query(self.user_model).filter(self.user_model.openid == openid).first()
         if not user:
-            user = self.create_user(openid, unionid)
+            user = self.reg_user(openid, unionid)
         return user
 
-    def user_info(self, code: str):
+    def get_user_by_code(self, code: str):
         openid, unionid, _ = self.api_service.auth_info(code)
-        user = self.load_user(openid, unionid)
+        user = self.load_or_reg_user(openid, unionid)
         return user
 
 

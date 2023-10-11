@@ -1,8 +1,9 @@
 import json
+from datetime import date, datetime, timedelta
 from typing import Optional, Union, Dict, Any
 
 import typing
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, ConfigDict
 from json import JSONEncoder
 from fastapi.responses import JSONResponse
 from starlette.background import BackgroundTask
@@ -16,10 +17,19 @@ class DateTimeEncoder(JSONEncoder):
 
 
 class JsonResponse(BaseModel):
+    model_config = ConfigDict(ser_json_timedelta='iso8601')
+
     success: bool = True
     data: Any = {}
     error_msg: str = ''
     code: int = 0
+
+    # class Config:
+    #     json_encoders = {
+    #         date: lambda v: v.strftime('%Y-%m-%d'),
+    #         datetime: lambda v: v.strftime('%Y-%m-%d %H:%M:%S'),
+    #         timedelta: timedelta_isoformat,
+    #     }
 
 
 class StructuredResponse(JSONResponse):

@@ -1,32 +1,35 @@
-from fastapi import APIRouter, Depends, Form, HTTPException
-
+from fastapi import APIRouter, Depends
 from starlette.requests import Request
-from starlette.responses import JSONResponse, RedirectResponse
 
-from common.token_service import TokenService, get_current_user
 from config.connections import get_db
-from services.user_service import WechatUserService
+from services.user_service import WechatUserService, get_current_user, UserUpdateSchema, UserType, UserInfoSchema
 
 router = APIRouter()
 
 
-@router.get('/code')
-def code(request: Request, db=Depends(get_db)):
-    redirect = request.query_params
-    print(type(redirect))
-    print('redirect', redirect.get('redirect'))
-    code = 1
-    return RedirectResponse(f'http://localhost:8000/user/token?code={code}')
+@router.get('/login/info')
+@router.get('/login/')
+def login(code: str, request: Request, db=Depends(get_db)):
+    info = True if request.url.path.endswith('info') else False
+    user_info = WechatUserService(db).get_token(code, info=info)
+    return user_info
 
 
-@router.get('/token')
-def get_wechat_token(
-        code: str,
-        db=Depends(get_db)):
-    token_info = WechatUserService(db).get_token(code)
-    return token_info
+@router.get('/info',
+            response_model=UserInfoSchema)
+def userinfo(current_user: get_current_user = Depends(), db=Depends(get_db)):
+    user = WechatUserService(db).load_user(openid=current_user.openid)
+    return user
 
 
-@router.get('/info')
-def userinfo(payload: get_current_user = Depends(), db=Depends(get_db)):
-    return payload
+@router.post('/update',
+             response_model=UserInfoSchema
+             )
+def update_userinfo(userinfo: UserUpdateSchema, current_user: get_current_user = Depends(), db=Depends(get_db)):
+    if userinfo.mobile and current_user.type_code == UserType.logged:  # 如果用户提供手机号，且当前用户是未验证用户，则将当前用户升级为验证用户
+        userinfo.type_code = UserType.validated
+    else:
+        userinfo.type_code = current_user.type_code
+
+    user = WechatUserService(db).update_user(openid=current_user.openid, userinfo=userinfo)
+    return user
