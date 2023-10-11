@@ -38,5 +38,6 @@ class LoadAuthorizationHeader:
     def __call__(self, request: Request) -> Optional[str]:
         token = request.headers.get("Authorization")
         if not token:
-            raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+            raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Not authenticated",
+                                headers={"WWW-Authenticate": "Bearer"})
         return token

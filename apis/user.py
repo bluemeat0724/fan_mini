@@ -7,8 +7,8 @@ from services.user_service import WechatUserService, get_current_user, UserUpdat
 router = APIRouter()
 
 
-@router.get('/login/info')
-@router.get('/login/')
+@router.get('/login/info', summary='登录 小程序code获取用户信息与token ')
+@router.get('/login/', summary='登录 小程序code获取token')
 def login(code: str, request: Request, db=Depends(get_db)):
     info = True if request.url.path.endswith('info') else False
     user_info = WechatUserService(db).get_token(code, info=info)
@@ -16,14 +16,15 @@ def login(code: str, request: Request, db=Depends(get_db)):
 
 
 @router.get('/info',
-            response_model=UserInfoSchema)
+            response_model=UserInfoSchema, summary='查看用户信息', description='请求头 Authorization: Bearer token')
 def userinfo(current_user: get_current_user = Depends(), db=Depends(get_db)):
     user = WechatUserService(db).load_user(openid=current_user.openid)
     return user
 
 
 @router.post('/update',
-             response_model=UserInfoSchema
+             response_model=UserInfoSchema,
+             summary='更新用户信息 昵称 头像 手机号'
              )
 def update_userinfo(userinfo: UserUpdateSchema, current_user: get_current_user = Depends(), db=Depends(get_db)):
     if userinfo.mobile and current_user.type_code == UserType.logged:  # 如果用户提供手机号，且当前用户是未验证用户，则将当前用户升级为验证用户

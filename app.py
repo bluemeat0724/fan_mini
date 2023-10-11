@@ -3,6 +3,7 @@ import os
 
 if os.getenv("MODE", "dev") != "prod":
     from icecream import install
+
     install()
 
 from fastapi import FastAPI, HTTPException
@@ -28,7 +29,7 @@ def pub_exception_handler(request, exc, code=400):
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
-    return StructuredResponse(content=str(exc.detail), success=False, status_code=exc.status_code)
+    return StructuredResponse(content=str(exc.detail), success=False, status_code=exc.status_code, headers=exc.headers)
 
 
 app.add_middleware(
