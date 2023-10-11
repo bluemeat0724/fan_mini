@@ -14,18 +14,18 @@ import uuid
 from wechatpayv3 import WeChatPay, WeChatPayType,SignType
 
 # https://wechatpay-api.gitbook.io/wechatpay-api-v3/
-APPID= 'wx86d99aa50962f24a'  # 小程序ID
-APPSECRET= 'b8f4edd8d0870a4f0cfb1e0f780c7c65'  # 小程序SECRET
-MCHID='1625210809'  # 商户号
-MCH_KEY='qwe123rty456uio789asd123zxc456vb'
+APPID= ''  # 小程序ID
+APPSECRET= ''  # 小程序SECRET
+MCHID=''  # 商户号
+MCH_KEY=''
 
 # 商户证书私钥
 with open('./path_to_key/apiclient_key.pem') as f:
     PRIVATE_KEY = f.read()
 # 商户证书序列号
-CERT_SERIAL_NO = '683915C02A8494FB3EF463903781551042F6556E'
+CERT_SERIAL_NO = ''
 # API v3密钥， https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_2.shtml
-APIV3_KEY = 'efe6487fcc7911ec836e5414ABCDabcd'
+APIV3_KEY = ''
 # 微信支付平台证书缓存目录
 CERT_DIR = './cert'
 # 回调地址
