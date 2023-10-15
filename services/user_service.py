@@ -1,9 +1,10 @@
 from enum import IntEnum
 from typing import Dict, Optional, Union
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from pydantic import BaseModel, field_validator, field_serializer, Field, ConfigDict
 from starlette.requests import Request
+from starlette.status import HTTP_401_UNAUTHORIZED
 
 from common.token_service import TokenService, LoadAuthorizationHeader
 from common.wechat_service import WechatBaseService
@@ -82,5 +83,8 @@ def get_current_user(request: Request, token: str = Depends(LoadAuthorizationHea
         db = next(get_db())
         user = db.query(WechatUser).filter(WechatUser.openid == 'ohfcVvxTDuJmbDijRK5IUwwG3tfQ').first()
         return UserPayloadSchema.model_validate(user)
+    if not token:
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Not authenticated",
+                            headers={"WWW-Authenticate": "Bearer"})
     payload = TokenService().decode(token)
     return UserPayloadSchema(**payload)

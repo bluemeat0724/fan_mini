@@ -1,10 +1,8 @@
 from datetime import timedelta, datetime
 from typing import Dict, Optional
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Header
 
 from jose import jwt
-from starlette.requests import Request
-from starlette.status import HTTP_401_UNAUTHORIZED
 
 from config.config import settings
 
@@ -35,9 +33,7 @@ class TokenService:
 
 
 class LoadAuthorizationHeader:
-    def __call__(self, request: Request) -> Optional[str]:
-        token = request.headers.get("Authorization")
-        if not token:
-            raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Not authenticated",
-                                headers={"WWW-Authenticate": "Bearer"})
-        return token
+    # def __call__(self, request: Request) -> Optional[str]:
+    #     authorization = request.headers.get("Authorization")
+    def __call__(self, authorization: str = Header(None)) -> Optional[str]:
+        return authorization
