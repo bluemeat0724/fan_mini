@@ -1,7 +1,7 @@
 from datetime import timedelta, datetime
 from typing import Dict, Optional
-from fastapi import Depends, HTTPException, Header
 
+from fastapi import Header
 from jose import jwt
 
 from config.config import settings
