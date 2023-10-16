@@ -10,35 +10,40 @@ import os
 import time
 import uuid
 
+from wechatpayv3 import WeChatPay, WeChatPayType, SignType
 
-from wechatpayv3 import WeChatPay, WeChatPayType,SignType
+# https://github.com/minibear2021/wechatpayv3
 
 # https://wechatpay-api.gitbook.io/wechatpay-api-v3/
-APPID= ''  # 小程序ID
-APPSECRET= ''  # 小程序SECRET
-MCHID=''  # 商户号
-MCH_KEY=''
+APPID = ''  # 小程序ID
+APPSECRET = ''  # 小程序SECRET
+
+MCHID = ''  # 商户号
 
 # 商户证书私钥
-with open('./path_to_key/apiclient_key.pem') as f:
+with open('./wechatlib/apiclient_key.pem') as f:
     PRIVATE_KEY = f.read()
 # 商户证书序列号
-CERT_SERIAL_NO = ''
+CERT_SERIAL_NO =
 # API v3密钥， https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_2.shtml
 APIV3_KEY = ''
 # 微信支付平台证书缓存目录
-CERT_DIR = './cert'
+CERT_DIR = './wechatlib/cert'
 # 回调地址
 # NOTIFY_URL = 'https://www.weixin.qq.com/wxpay/pay.php'
 NOTIFY_URL = 'https://locallife.zen-x.com.cn/apis/paynotify'
-# 日志记录器，记录web请求和回调细节，便于调试排错
-logging.basicConfig(filename=os.path.join(os.getcwd(), 'wepay.log'), level=logging.DEBUG, filemode='a', format='%(asctime)s - %(process)s - %(levelname)s: %(message)s')
-LOGGER = logging.getLogger("wepay")
+
+# 微信支付平台证书缓存目录，初始调试的时候可以设为None，首次使用确保此目录为空目录。
+CERT_DIR = './cert'
+
+# 日志记录器，记录web请求和回调细节，便于调试排错。
+logging.basicConfig(filename=os.path.join(os.getcwd(), 'demo.log'), level=logging.DEBUG, filemode='a', format='%(asctime)s - %(process)s - %(levelname)s: %(message)s')
+LOGGER = logging.getLogger("demo")
 
 # 接入模式:False=直连商户模式，True=服务商模式
 PARTNER_MODE = False
-code2session_url="https://api.weixin.qq.com/sns/jscode2session?grant_type=authorization_code"
-jsapi_create='https://api.mch.weixin.qq.com/v3/pay/transactions/jsapi'
+code2session_url = "https://api.weixin.qq.com/sns/jscode2session?grant_type=authorization_code"
+jsapi_create = 'https://api.mch.weixin.qq.com/v3/pay/transactions/jsapi'
 
 wxpay = WeChatPay(
     wechatpay_type=WeChatPayType.MINIPROG,
@@ -53,22 +58,21 @@ wxpay = WeChatPay(
     cert_dir=CERT_DIR)
 
 
-
-#登录信息
+# 登录信息
 def getLoginInfo(code):
     url = code2session_url
-    params = {'appid':APPID,'secret':APPSECRET,'js_code':code}
-    re_data = requests.get(url,params=params)
+    params = {'appid': APPID, 'secret': APPSECRET, 'js_code': code}
+    re_data = requests.get(url, params=params)
     json_response = re_data.content.decode()  # 获取的文本 就是一个json字符串
     # 将json字符串转换成dic字典对象
     data = json.loads(json_response)
     if data.get('session_key'):
         return data
-    return  False
+    return False
 
 
 # 统一下单 小程序获得prepay_id
-def pay(tradeno,openid,amount=100):
+def pay(tradeno, openid, amount=100):
     code, message = wxpay.pay(
         description='诚心拜一拜',
         out_trade_no=tradeno,
@@ -83,7 +87,7 @@ def pay(tradeno,openid,amount=100):
         package = 'prepay_id=' + prepay_id
         paysign = wxpay.sign(data=[APPID, timestamp, noncestr, package], sign_type=SignType.RSA_SHA256)
         signtype = 'RSA'
-        return code,{
+        return code, {
             'appId': APPID,
             'timeStamp': timestamp,
             'nonceStr': noncestr,
@@ -92,7 +96,8 @@ def pay(tradeno,openid,amount=100):
             'paySign': paysign
         }
     else:
-        return code,message
+        return code, message
+
 
 def pay_callback(request):
     headers = {}
@@ -103,12 +108,14 @@ def pay_callback(request):
     result = wxpay.callback(headers=headers, body=request.body)
     return result
 
+
 # 订单查询
 def query():
     code, message = wxpay.query(
         transaction_id='demo-transation-id'
     )
     print('code: %s, message: %s' % (code, message))
+
 
 # 关闭订单
 def close():
@@ -117,14 +124,16 @@ def close():
     )
     print('code: %s, message: %s' % (code, message))
 
+
 # 申请退款
 def refund():
-    code, message=wxpay.refund(
+    code, message = wxpay.refund(
         out_refund_no='demo-out-refund-no',
         amount={'refund': 100, 'total': 100, 'currency': 'CNY'},
         transaction_id='1217752501201407033233368018'
     )
     print('code: %s, message: %s' % (code, message))
+
 
 # 退款查询
 def query_refund():
@@ -132,6 +141,7 @@ def query_refund():
         out_refund_no='demo-out-refund-no'
     )
     print('code: %s, message: %s' % (code, message))
+
 
 # 申请交易账单
 def trade_bill():
@@ -141,7 +151,7 @@ def trade_bill():
     print('code: %s, message: %s' % (code, message))
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     # 支付
     class WePay(APIView):
         def get(self, request):
