@@ -1,6 +1,10 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from starlette.requests import Request
 
+from apis.services.order import WechatOrderService
 from config.connections import get_db
 from services.user_service import WechatUserService, get_current_user, UserUpdateSchema, UserType, UserInfoSchema
 
@@ -34,3 +38,24 @@ def update_userinfo(userinfo: UserUpdateSchema, current_user: get_current_user =
 
     user = WechatUserService(db).update_user(openid=current_user.openid, userinfo=userinfo)
     return user
+
+
+class Payment(BaseModel):
+    amount: Optional[int] = 1
+    description: Optional[str] = '测试'
+
+
+@router.post('/pay/mini',
+             summary='小程序下单支付')
+def pay_mini(payment: Payment, current_user: get_current_user = Depends(), db=Depends(get_db)):
+    openid = current_user.openid
+    response = WechatOrderService.simple_pay(openid=openid, amount=payment.amount, description=payment.description,
+                                             db=db)
+    return response
+
+
+@router.post('/pay/notify',
+             summary='小程序支付通知回调')
+async def pay_mini(request: Request, db=Depends(get_db)):
+    response = await WechatOrderService.pay_notify(request, db)
+    return response

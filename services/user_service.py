@@ -1,3 +1,4 @@
+import os
 from enum import IntEnum
 from typing import Dict, Optional, Union
 
@@ -79,9 +80,9 @@ class WechatUserService(WechatBaseService):
 def get_current_user(request: Request, token: str = Depends(LoadAuthorizationHeader())):
     request_from_swagger = request.headers.get('referer').endswith('docs') if request.headers.get(
         'referer') else False
-    if request_from_swagger:
+    if request_from_swagger and os.getenv('mode') != 'prod':
         db = next(get_db())
-        user = db.query(WechatUser).filter(WechatUser.openid == 'ohfcVvxTDuJmbDijRK5IUwwG3tfQ').first()
+        user = db.query(WechatUser).filter(WechatUser.id == 1).first()
         return UserPayloadSchema.model_validate(user)
     if not token:
         raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Not authenticated",
