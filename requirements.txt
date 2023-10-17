@@ -1,4 +1,4 @@
-fastapi
+fastapi>=0.103.2
 python-multipart
 pydantic_settings==2.4.2
 pydantic>=2.4.2
