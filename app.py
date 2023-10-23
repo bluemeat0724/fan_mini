@@ -11,7 +11,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from config.config import settings
 from common.response import StructuredResponse
 from apis.user import router as userrouter
-from common.middlewares import pub_exception_handler
 
 app = FastAPI(
     debug=settings.debug,
@@ -23,7 +22,7 @@ app = FastAPI(
 
 
 @app.exception_handler(Exception)
-def pub_exception_handler(request, exc, code=400):
+def pub_exception_handler(request, exc, code=200):
     return StructuredResponse(content=str(exc), success=False, status_code=code)
 
 

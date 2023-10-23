@@ -50,7 +50,7 @@ class WechatOrderService:
             order.trade_state = 'failed'
             order.trade_state_desc = data['reason']
             db.commit()
-            return StructuredResponse(content=data['reason'], success=False, status_code=status.HTTP_400_BAD_REQUEST)
+            return StructuredResponse(content=data['reason'], success=False, status_code=200)
 
     @classmethod
     async def pay_notify(cls, request: Request, db: Session):
